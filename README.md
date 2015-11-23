@@ -1,38 +1,44 @@
-# Telegramas Resultados Argentina Balotaje 2015
+# Telegramas Argentina Balotaje 2015 - Script
 
-El escraper es específico de un proyecto personal que no lo tengo opensourceado y que todavía no lo convertí en una librería aparte así que van a tener que excusar el código extra en `/lib/scrapers`. El importante es `/lib/telegramas_page_processors.rb` y `/lib/urls_page_processor.rb`.
+Este script es para descargar todos los telegramas del balotaje encontrados en
+la siguiente dirección: http://www.resultados.gob.ar/bltgetelegr/Itelegramas.htm
 
-Los datos están en `telegramas.json` y los pdf están en `/telegramas/<distrito>/<seccion>/<circuito>/<mesa>.pdf`.
+Si no carga la página es porque ya la bajaron.
 
-También los mismos datos están en telegramas.sqlite3
+Los resultados con los datos los podés encontrar en [Zequez/telegramas-balotaje-argentina-2015](https://github.com/Zequez/telegramas-balotaje-argentina-2015)
 
-Cada telegrama tiene el siguiente formato:
+# Formato
+
+El formato de los telegramas es el siguiente (con ejemplo):
 
 ```json
 {
-  "url": "",
-  "distrito": "",
-  "distrito_nombre": "",
-  "seccion": "",
-  "seccion_nombre": "",
-  "circuito": "",
-  "mesa": "",
-  "estado": "",
-  "pdf": "",
-  "votos": {
-    "nulos": 0,
-    "blancos": 0,
-    "recurridos": 0,
-    "impugnados": 0,
-    "fpv": 0,
-    "cambiemos": 0
-  }
+  "id": 5742,
+  "url": "http://www.resultados.gob.ar/bltgetelegr/02/038/0302/020380302_0048.htm",
+  "distrito": "02",
+  "seccion": "038",
+  "circuito": "0302",
+  "mesa": "0048",
+  "estado": "Grabada",
+  "pdf": "http://www.resultados.gob.ar/bltgetelegr/02/038/0302/020380302_0048.pdf",
+  "votos_nulos": null,
+  "votos_blancos": 4,
+  "votos_recurridos": 0,
+  "votos_impugnados": 0,
+  "votos_fpv": 180,
+  "votos_cambiemos": 111,
+  "distrito_nombre": "Buenos Aires",
+  "seccion_nombre": "Florencio Varela"
 }
 ```
 
-## Correr el script vos mismo
+Los PDF no fueron descargados porque pesaban aproximadamente 105KB c/u, y con 92mil
+telegramas, eso nos lleva a aproximadamente 9GB de PDFs. Estás invitado a descargarlos y
+hostearlos en algún otro lado, porque Github no los va a aceptar.
 
-Para usar el script necesitan Ruby.
+# Correr el script vos mismo
+
+Para usar el script necesitás Ruby.
 
 Instalar las dependencias:
 
@@ -43,7 +49,6 @@ bundle install
 Para crear la base de datos:
 
 ```sh
-rake db:create
 rake db:migrate
 ```
 
@@ -59,14 +64,11 @@ Luego hacen el scraping de los telegramas, usando las URLs scrapeadas anteriorme
 rake scrap:telegramas # Demora 20 minutos más o menos
 ```
 
+Recomendado que lo corran un par de veces el script, ya que cuando una URL tira error, simplemente
+sigue con la próxima. Corriendo el script 2 veces va a intentar cargar únicamente las URL que no pudo cargar previamente.
+
 Luego usan el siguiente comando para dumpear toda la base de datos en un `telegramas.json` y `telegramas.min.json`:
 
 ```sh
 rake dump_json
-```
-
-Y finalmente, otro comando para descargar todos los PDF y ponerlos en `/telegramas`
-
-```ruby
-bundle rake pdf
 ```
