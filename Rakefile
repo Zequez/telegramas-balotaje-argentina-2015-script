@@ -57,23 +57,46 @@ namespace :scrap do
   end
 end
 
-task :datos => :environment do
-  File.write 'data/fpv_0.json', JSON.pretty_generate(Telegrama
-    .where(votos_fpv: 0)
-    .where.not(votos_cambiemos: 0)
-    .map(&:attributes))
-  File.write 'data/cambiemos_0.json', JSON.pretty_generate(Telegrama
-    .where(votos_cambiemos: 0)
-    .where.not(votos_fpv: 0)
-    .map(&:attributes))
-  File.write 'data/todos_0.json', JSON.pretty_generate(Telegrama
-    .where(votos_nulos: 0)
-    .where(votos_impugnados: 0)
-    .where(votos_blancos: 0)
-    .where(votos_recurridos: 0)
-    .where(votos_cambiemos: 0)
-    .where(votos_fpv: 0)
-    .map(&:attributes))
+
+namespace :datos do
+  task :sospechosos => :environment do
+    def l(t)
+      p 'rastrsat'
+      "[#{t.distrito_nombre} - #{t.seccion_nombre} - #{t.circuito} - #{t.mesa}](#{t.url})"
+    end
+
+    def links(telegramas)
+      telegramas.map{|t| l(t)}.join("\n")
+    end
+
+    File.write 'data/fpv_0.md', (
+      "# Lugares donde el FPV obtuvo 0 votos y el Cambiemos no\n\n" +
+      links(Telegrama.where(votos_fpv: 0).where.not(votos_cambiemos: 0))
+    )
+    File.write 'data/cambiemos_0.md', (
+      "# Lugares donde Cambiemos obtuvo 0 votos y el FPV no\n\n" +
+      links(Telegrama.where(votos_cambiemos: 0).where.not(votos_fpv: 0))
+    )
+  end
+
+  task :json => :environment do
+    File.write 'data/fpv_0.json', JSON.pretty_generate(Telegrama
+      .where(votos_fpv: 0)
+      .where.not(votos_cambiemos: 0)
+      .map(&:attributes))
+    File.write 'data/cambiemos_0.json', JSON.pretty_generate(Telegrama
+      .where(votos_cambiemos: 0)
+      .where.not(votos_fpv: 0)
+      .map(&:attributes))
+    File.write 'data/todos_0.json', JSON.pretty_generate(Telegrama
+      .where(votos_nulos: 0)
+      .where(votos_impugnados: 0)
+      .where(votos_blancos: 0)
+      .where(votos_recurridos: 0)
+      .where(votos_cambiemos: 0)
+      .where(votos_fpv: 0)
+      .map(&:attributes))
+  end
 end
 
 desc 'Crear telegramas.json y telegramas.min.json con los datos en la base de datos'
