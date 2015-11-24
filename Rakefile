@@ -77,12 +77,9 @@ end
 
 namespace :datos do
   task :resultados => :environment do
-    cambiemos = Telegrama.where.not(votos_cambiemos: nil).pluck(:votos_cambiemos).inject(0, &:+)
-    fpv = Telegrama.where.not(votos_fpv: nil).pluck(:votos_fpv).inject(0, &:+)
-    p_cambiemos = (cambiemos.to_f/(cambiemos+fpv)*100).round(2)
-    p_fpv = (fpv.to_f/(cambiemos+fpv)*100).round(2)
-    puts "Cambiemos: #{p_cambiemos}%"
-    puts "FPV: #{p_fpv}%"
+    p Telegrama.votos_totales
+    p Telegrama.votos_totales_porcentaje
+    p Telegrama.votos_totales_positivos_porcentaje
   end
 
   task :sospechosos => :environment do
@@ -105,25 +102,6 @@ namespace :datos do
       Telegrama.where(votos_cambiemos: 0).where.not(votos_fpv: 0))
     make_list('mesas_perdidas', 'Lugares donde la información sobre la mesa no está disponible',
       Telegrama.where('votos_nulos IS NULL').order('distrito ASC, seccion ASC'))
-  end
-
-  task :json => :environment do
-    File.write 'data/fpv_0.json', JSON.pretty_generate(Telegrama
-      .where(votos_fpv: 0)
-      .where.not(votos_cambiemos: 0)
-      .map(&:attributes))
-    File.write 'data/cambiemos_0.json', JSON.pretty_generate(Telegrama
-      .where(votos_cambiemos: 0)
-      .where.not(votos_fpv: 0)
-      .map(&:attributes))
-    File.write 'data/todos_0.json', JSON.pretty_generate(Telegrama
-      .where(votos_nulos: 0)
-      .where(votos_impugnados: 0)
-      .where(votos_blancos: 0)
-      .where(votos_recurridos: 0)
-      .where(votos_cambiemos: 0)
-      .where(votos_fpv: 0)
-      .map(&:attributes))
   end
 end
 
