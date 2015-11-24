@@ -18,7 +18,7 @@ class TelegramasPageProcessor < Scrapers::BasePageProcessor
     d[:votos_nulos]      = int(css('.pt1 tbody tr:nth-child(1) td').text)
     d[:votos_blancos]    = int(css('.pt1 tbody tr:nth-child(2) td').text)
     d[:votos_recurridos] = int(css('.pt1 tbody tr:nth-child(3) td').text)
-    d[:votos_impugnados] = int(css('.pt2 tbody tr:nth-child(1) td').text)
+    d[:votos_impugnados] = int(css('.pt2 tbody td').text)
     d[:votos_fpv]        = int(css('#TVOTOS tbody tr:nth-child(1) td').text)
     d[:votos_cambiemos]  = int(css('#TVOTOS tbody tr:nth-child(2) td').text)
 

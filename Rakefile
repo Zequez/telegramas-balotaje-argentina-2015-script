@@ -39,7 +39,7 @@ namespace :scrap do
 
   desc 'Scrapear todos los telegramas y guardarlos en data.json y scrapers'
   task :telegramas => :environment do
-    telegramas = Telegrama.all.where(votos_nulos: nil)
+    telegramas = Telegrama.all
     total = telegramas.count
     puts total
     count = 0
