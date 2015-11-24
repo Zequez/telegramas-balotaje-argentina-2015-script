@@ -86,21 +86,25 @@ namespace :datos do
   end
 
   task :sospechosos => :environment do
-    def l(t)
-      "#{t.distrito_nombre} | #{t.seccion_nombre} | #{t.circuito} | #{t.mesa} | [#{t.votos}](#{t.url})"
+    def l(t, i)
+      "#{i} | #{t.distrito_nombre} | #{t.seccion_nombre} | #{t.circuito} | #{t.mesa} | #{t.votos} | [Ver telegrama](#{t.url})"
     end
 
     def links(telegramas)
-      "Distrito | Sección | Circuito | Mesa | Votos registrados\n --- | --- | --- | --- | ---\n" +
-      telegramas.map{|t| l(t)}.join("\n")
+      "Nro. | Distrito | Sección | Circuito | Mesa | Votos registrados | Link \n --- | --- | --- | --- | --- | --- | ---\n" +
+      telegramas.each_with_index.map{|t, i| l(t, i)}.join("\n")
     end
 
     def make_list(file, title, query)
       File.write "data/#{file}.md", ("## #{title}\n\n" + links(query))
     end
 
-    # make_list('fpv_0', 'Lugares donde el FPV obtuvo 0 votos y el Cambiemos no',
-    #   Telegrama.where(votos_fpv: 0).where.not(votos_cambiemos: 0))
+    make_list('fpv_0', 'Lugares donde el FPV obtuvo 0 votos y Cambiemos no',
+      Telegrama.where(votos_fpv: 0).where.not(votos_cambiemos: 0))
+    make_list('cambiemos_0', 'Lugares donde el Cambiemos obtuvo 0 votos y el FPV no',
+      Telegrama.where(votos_cambiemos: 0).where.not(votos_fpv: 0))
+    make_list('mesas_perdidas', 'Lugares donde la información sobre la mesa no está disponible',
+      Telegrama.where('votos_nulos IS NULL').order('distrito ASC, seccion ASC'))
   end
 
   task :json => :environment do
