@@ -1,6 +1,7 @@
 require 'json'
 require 'active_record'
 require 'standalone_migrations'
+require 'byebug'
 StandaloneMigrations::Tasks.load_tasks
 
 require_relative 'lib/scrapers/scrapers'
@@ -37,9 +38,10 @@ namespace :scrap do
   end
 
   desc 'Scrapear todos los telegramas y guardarlos en data.json y scrapers'
-  task :telegramas => :environment do |args|
-    telegramas = Telegrama.where(distrito: nil)
+  task :telegramas => :environment do
+    telegramas = Telegrama.all.where(votos_nulos: nil)
     total = telegramas.count
+    puts total
     count = 0
     telegramas.find_in_batches do |batch|
       urls = batch.map(&:url)
@@ -47,13 +49,31 @@ namespace :scrap do
         .scrap(collect: false) do |req|
           count += 1
           puts "#{count}/#{total}"
-
           telegrama = req.resource
           telegrama.assign_attributes req.output
           telegrama.save!
         end
     end
   end
+end
+
+task :datos => :environment do
+  File.write 'data/fpv_0.json', JSON.pretty_generate(Telegrama
+    .where(votos_fpv: 0)
+    .where.not(votos_cambiemos: 0)
+    .map(&:attributes))
+  File.write 'data/cambiemos_0.json', JSON.pretty_generate(Telegrama
+    .where(votos_cambiemos: 0)
+    .where.not(votos_fpv: 0)
+    .map(&:attributes))
+  File.write 'data/todos_0.json', JSON.pretty_generate(Telegrama
+    .where(votos_nulos: 0)
+    .where(votos_impugnados: 0)
+    .where(votos_blancos: 0)
+    .where(votos_recurridos: 0)
+    .where(votos_cambiemos: 0)
+    .where(votos_fpv: 0)
+    .map(&:attributes))
 end
 
 desc 'Crear telegramas.json y telegramas.min.json con los datos en la base de datos'
