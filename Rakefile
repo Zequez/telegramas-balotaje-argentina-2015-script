@@ -61,8 +61,7 @@ end
 namespace :datos do
   task :sospechosos => :environment do
     def l(t)
-      p 'rastrsat'
-      "[#{t.distrito_nombre} - #{t.seccion_nombre} - #{t.circuito} - #{t.mesa}](#{t.url})"
+      "- [#{t.distrito_nombre} - #{t.seccion_nombre} - #{t.circuito} - #{t.mesa}](#{t.url})"
     end
 
     def links(telegramas)
